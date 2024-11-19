@@ -49,7 +49,7 @@ ax2.imshow(cl_im, cmap='gray', aspect="auto")
 fit = np.polyfit(unique_x,avg_y+700.,1)
 ax2.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
 ax2.plot(unique_x,avg_y+700. ,'b--',linewidth=1)
-ax2.axis([1800, 1800+700, 750+170, 750])
+ax2.axis(roi1)
 ax2.tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False) 
                 
