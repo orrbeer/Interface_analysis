@@ -8,8 +8,8 @@ import matplotlib.patches as patches
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rc('font', size=14)
 
-br_im = plt.imread('br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
-cl_im = plt.imread('90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
+br_im = plt.imread('images/br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
+cl_im = plt.imread('images/90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
 
 br_tr = br_im[300:430,:] # trim the figures for a single interface
 br_bin = np.zeros(np.shape(br_tr))
@@ -35,7 +35,8 @@ ax5 = fig.add_subplot(427)
 ax6 = fig.add_subplot(428)
 
 ax1.imshow(cl_im, cmap='gray', aspect="auto")
-rect1 = patches.Rectangle((1800, 750), 700, 170, linewidth=1, edgecolor='r', facecolor='none')
+roi1 = [1800, 2550, 920, 750]
+rect1 = patches.Rectangle((roi1[0], roi1[1]-roi1[0]), roi1[1]-roi1[0], roi1[2]-roi1[3], linewidth=1, edgecolor='r', facecolor='none')
 rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
 ax1.add_patch(rect1)
 ax1.add_patch(rect2)
