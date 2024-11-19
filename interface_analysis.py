@@ -35,8 +35,8 @@ ax5 = fig.add_subplot(427)
 ax6 = fig.add_subplot(428)
 
 ax1.imshow(cl_im, cmap='gray', aspect="auto")
-roi1 = [1800, 2550, 920, 750]
-rect1 = patches.Rectangle((roi1[0], roi1[1]-roi1[0]), roi1[1]-roi1[0], roi1[2]-roi1[3], linewidth=1, edgecolor='r', facecolor='none')
+roi1 = [1800, 2500, 920, 750]
+rect1 = patches.Rectangle((roi1[0], roi1[3]), roi1[1]-roi1[0], roi1[2]-roi1[3], linewidth=1, edgecolor='r', facecolor='none')
 rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
 ax1.add_patch(rect1)
 ax1.add_patch(rect2)
@@ -49,7 +49,7 @@ ax2.imshow(cl_im, cmap='gray', aspect="auto")
 fit = np.polyfit(unique_x,avg_y+700.,1)
 ax2.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
 ax2.plot(unique_x,avg_y+700. ,'b--',linewidth=1)
-ax2.axis(roi1)
+ax2.axis([1800, 1800+700, 750+170, 750])
 ax2.tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False) 
                 
@@ -72,7 +72,8 @@ unique_x = np.unique(x) # Remove values that are not single values of f(x) חד 
 avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
 
 ax3.imshow(br_im, cmap='gray', aspect="auto")
-rect1 = patches.Rectangle((800, 320), 600, 150, linewidth=1, edgecolor='r', facecolor='none')
+roi2 = [800, 1400, 470, 320]
+rect1 = patches.Rectangle((roi2[0], roi2[3]), roi2[1]-roi2[0], roi2[2]-roi2[3], linewidth=1, edgecolor='r', facecolor='none')
 rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
 ax3.add_patch(rect1)
 ax3.add_patch(rect2)
@@ -85,7 +86,7 @@ ax4.imshow(br_im, cmap='gray', aspect="auto")
 fit = np.polyfit(unique_x,avg_y+300.,1)
 ax4.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1)
 ax4.plot(unique_x,avg_y+300 ,'b--',linewidth=0.8)
-ax4.axis([800, 800+600, 320+150, 320])
+ax4.axis(roi2)
 ax4.tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False) 
                 
