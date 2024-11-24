@@ -57,10 +57,10 @@ ax2.tick_params(left = False, right = False , labelleft = False ,
 yfit = np.polyval(fit,unique_x)
 ax5.plot(unique_x/480*500,(yfit-avg_y-700)/480*500)
 ax5.set_xlabel('Distance (nm)')
-ax5.set_ylabel('Distance (nm)')
+ax5.set_ylabel('Residual (nm)')
 ax5.set_xlim([0, 3200])
-ax5.set_ylim([29, -48])
-ax5.vlines(x=[1800/480*500, (1800+700)/480*500], ymin=-6.8, ymax=7.9, colors='k', ls='--', linewidth=0.7)
+ax5.set_ylim([30, -49])
+ax5.vlines(x=[1800/480*500, (1800+700)/480*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
 gof = sum(map(abs, yfit-avg_y-700))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
 print(gof/480*500)
 
@@ -94,10 +94,10 @@ ax4.tick_params(left = False, right = False , labelleft = False ,
 yfit = np.polyval(fit,unique_x)
 ax6.plot(unique_x/238*500,(yfit-avg_y-300)/238*500)
 ax6.set_xlabel('Distance (nm)')
-ax6.set_ylabel('Distance (nm)')
+ax6.set_ylabel('Residual (nm)')
 ax6.set_xlim([0, 3200])
-ax5.set_ylim([29, -48])
-ax6.vlines(x=[800/238*500, (800+600)/238*500], ymin=-57, ymax=29, colors='k', ls='--', linewidth=0.7)
+ax6.set_ylim([30, -49])
+ax6.vlines(x=[800/238*500, (800+600)/238*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
 gof = sum(map(abs, yfit-avg_y-300))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
 print(gof/238*500)
 
