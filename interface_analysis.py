@@ -30,6 +30,14 @@ def binary_mask(im, threshold=False, show_ims=False):
         plt.imshow(br_bin)
     return br_bin
     
+def edge_image2scatter(edge_im,sho_ims=False):
+    xy = np.column_stack(np.where(edge_im > 0)) # Get the x and y values of the interface for a scatter plot.
+    x = xy[:,1]
+    y = xy[:,0]
+    unique_x = np.unique(x) # Remove values that are not single values of f(x) חד חד ערכי
+    avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
+    return unique_x, avg_y
+    
 
 br_im = plt.imread('images/br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
 cl_im = plt.imread('images/90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
@@ -40,14 +48,15 @@ br_edge = feature.canny(br_tr, sigma=1.65) # canny filter that marks the interfa
 
 cl_tr =  set_ROI('images/90_rt_cl_15-1.tif',700,880,0,-1)
 cl_bin = binary_mask(cl_tr)
-# cl_bin = np.zeros(np.shape(cl_tr)) # To make a binary of the image I first make an zeros matrix with the same size of the image
-# cl_bin[cl_tr>np.average(cl_tr)] = 255 # Then every pixel in the image with value greater than average is maped to the zero matrix with the value 255 (max of grayscale)
 cl_edge = feature.canny(cl_bin, sigma=2) # Canny filter detects edges.
-cl_xy = np.column_stack(np.where(cl_edge > 0)) # Get the x and y values of the interface for a scatter plot.
-x = cl_xy[:,1]
-y = cl_xy[:,0]
-unique_x = np.unique(x) # Remove values that are not single values of f(x) חד חד ערכי
-avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
+
+cl_x, cl_y = edge_image2scatter(cl_edge)
+
+# cl_xy = np.column_stack(np.where(cl_edge > 0)) # Get the x and y values of the interface for a scatter plot.
+# x = cl_xy[:,1]
+# y = cl_xy[:,0]
+# unique_x = np.unique(x) # Remove values that are not single values of f(x) חד חד ערכי
+# avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
 
 fig = plt.figure(figsize=(7,5.5))
 ax1 = fig.add_subplot(4,2,(1,3))
@@ -69,26 +78,26 @@ ax1.tick_params(left = False, right = False , labelleft = False ,
                 labelbottom = False, bottom = False) 
 
 ax2.imshow(cl_im, cmap='gray', aspect="auto")
-fit = np.polyfit(unique_x,avg_y+700.,1)
+fit = np.polyfit(cl_x,cl_y+700.,1)
 ax2.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
-ax2.plot(unique_x,avg_y+700. ,'b--',linewidth=1)
+ax2.plot(cl_x,cl_y+700. ,'b--',linewidth=1)
 ax2.axis([1800, 1800+700, 750+170, 750])
 ax2.tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False) 
                 
                 
-yfit = np.polyval(fit,unique_x)
-ax5.plot(unique_x/480*500,(yfit-avg_y-700)/480*500)
+yfit = np.polyval(fit,cl_x)
+ax5.plot(cl_x/480*500,(yfit-cl_y-700)/480*500)
 ax5.set_xlabel('Distance (nm)')
 ax5.set_ylabel('Residual (nm)')
 ax5.set_xlim([0, 3200])
 ax5.set_ylim([30, -49])
 ax5.vlines(x=[1800/480*500, (1800+700)/480*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
-gof = sum(map(abs, yfit-avg_y-700))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
+gof = sum(map(abs, yfit-cl_y-700))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
 print(gof/480*500)
 
 # ax5.set_xlim([1800, 1800+700])
-
+###########################################
 br_xy = np.column_stack(np.where(br_edge > 0)) # Get the x and y values of the interface for a scatter plot.
 x = br_xy[:,1]
 y = br_xy[:,0]
