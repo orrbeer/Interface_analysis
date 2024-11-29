@@ -8,15 +8,36 @@ import matplotlib.patches as patches
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rc('font', size=14)
 
+def set_ROI(file,x1,x2,y1,y2, show_ims=False):
+    im = plt.imread(file)
+    if show_ims == True:
+        plt.subplot(211)
+        plt.imshow(im)
+        plt.subplot(212)
+        plt.imshow(im[x1:x2, y1:y2])
+        plt.show()
+    return im[x1:x2, y1:y2]
+
+def binary_mask(im, threshold=False, show_ims=False):
+    if not threshold:
+        br_tr>np.average(im)
+    br_bin = np.zeros(np.shape(br_tr))
+    br_bin[br_tr>threshold] = 255
+    if show_ims == True:
+        plt.subplot(121)
+        plt.imshow(im)
+        plt.subplot(122)
+        plt.imshow(br_bin)
+    return br_bin
+
 br_im = plt.imread('images/br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
 cl_im = plt.imread('images/90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
 
-br_tr = br_im[300:430,:] # trim the figures for a single interface
-br_bin = np.zeros(np.shape(br_tr))
-br_bin[br_tr>np.average(br_tr)] = 255
+br_tr = set_ROI('images/br.tif',300,430,0,-1) # trim the figures for a single interface
+br_bin = binary_mask(br_tr)
 br_edge = feature.canny(br_tr, sigma=1.65) # canny filter that marks the interface
 
-cl_tr = cl_im[700:880,:]
+cl_tr =  set_ROI('images/90_rt_cl_15-1.tif',700,880,0,-1)
 cl_bin = np.zeros(np.shape(cl_tr)) # To make a binary of the image I first make an zeros matrix with the same size of the image
 cl_bin[cl_tr>np.average(cl_tr)] = 255 # Then every pixel in the image with value greater than average is maped to the zero matrix with the value 255 (max of grayscale)
 cl_edge = feature.canny(cl_bin, sigma=2) # Canny filter detects edges.
@@ -26,7 +47,7 @@ y = cl_xy[:,0]
 unique_x = np.unique(x) # Remove values that are not single values of f(x) חד חד ערכי
 avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
 
-fig = plt.figure()
+fig = plt.figure(figsize=(7,5.5))
 ax1 = fig.add_subplot(4,2,(1,3))
 ax2 = fig.add_subplot(425)
 ax3 = fig.add_subplot(4,2,(2,4))
@@ -94,12 +115,13 @@ ax4.tick_params(left = False, right = False , labelleft = False ,
 yfit = np.polyval(fit,unique_x)
 ax6.plot(unique_x/238*500,(yfit-avg_y-300)/238*500)
 ax6.set_xlabel('Distance (nm)')
-ax6.set_ylabel('Residual (nm)')
+# ax6.set_ylabel('Residual (nm)')
 ax6.set_xlim([0, 3200])
 ax6.set_ylim([30, -49])
 ax6.vlines(x=[800/238*500, (800+600)/238*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
 gof = sum(map(abs, yfit-avg_y-300))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
 print(gof/238*500)
-
-plt.tight_layout()
+fig.subplots_adjust(hspace=0.5, right=0.95, top=0.96)
+# plt.tight_layout()
+plt.savefig(r'Output\example.svg')
 plt.show()
