@@ -20,15 +20,16 @@ def set_ROI(file,x1,x2,y1,y2, show_ims=False):
 
 def binary_mask(im, threshold=False, show_ims=False):
     if not threshold:
-        br_tr>np.average(im)
-    br_bin = np.zeros(np.shape(br_tr))
-    br_bin[br_tr>threshold] = 255
+        threshold = np.average(im)
+    br_bin = np.zeros(np.shape(im))
+    br_bin[im>threshold] = 255
     if show_ims == True:
         plt.subplot(121)
         plt.imshow(im)
         plt.subplot(122)
         plt.imshow(br_bin)
     return br_bin
+    
 
 br_im = plt.imread('images/br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
 cl_im = plt.imread('images/90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
@@ -38,8 +39,9 @@ br_bin = binary_mask(br_tr)
 br_edge = feature.canny(br_tr, sigma=1.65) # canny filter that marks the interface
 
 cl_tr =  set_ROI('images/90_rt_cl_15-1.tif',700,880,0,-1)
-cl_bin = np.zeros(np.shape(cl_tr)) # To make a binary of the image I first make an zeros matrix with the same size of the image
-cl_bin[cl_tr>np.average(cl_tr)] = 255 # Then every pixel in the image with value greater than average is maped to the zero matrix with the value 255 (max of grayscale)
+cl_bin = binary_mask(cl_tr)
+# cl_bin = np.zeros(np.shape(cl_tr)) # To make a binary of the image I first make an zeros matrix with the same size of the image
+# cl_bin[cl_tr>np.average(cl_tr)] = 255 # Then every pixel in the image with value greater than average is maped to the zero matrix with the value 255 (max of grayscale)
 cl_edge = feature.canny(cl_bin, sigma=2) # Canny filter detects edges.
 cl_xy = np.column_stack(np.where(cl_edge > 0)) # Get the x and y values of the interface for a scatter plot.
 x = cl_xy[:,1]
