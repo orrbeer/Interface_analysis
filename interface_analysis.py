@@ -71,7 +71,7 @@ for i,file in enumerate(files):
     if i == 0:
         roi_x1, roi_x2, roi_y1, roi_y2 = br_roi_x1, br_roi_x2,br_roi_y1,br_roi_y2
         zoom_x1, zoom_x2, zoom_y1, zoom_y2 = br_zoom_x1, br_zoom_x2, br_zoom_y1, br_zoom_y2
-        s = 15
+        s = 1.65
         rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
         axis = [0,1500,1030,30]
         text_xy = [1150, 930]
@@ -79,7 +79,7 @@ for i,file in enumerate(files):
     else:
         roi_x1, roi_x2, roi_y1, roi_y2 = cl_roi_x1, cl_roi_x2,cl_roi_y1,cl_roi_y2
         zoom_x1, zoom_x2, zoom_y1, zoom_y2 = cl_zoom_x1, cl_zoom_x2, cl_zoom_y1, cl_zoom_y2
-        s = 2
+        s = 3
         rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
         axis = [782,2618,1610,390]
         text_xy = [2065, 1490]
@@ -87,8 +87,8 @@ for i,file in enumerate(files):
     
     im = plt.imread(file) #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
     tr = set_ROI(im, roi_y1, roi_y2,roi_x1, roi_x2) # trim the figures for a single interface
-    bin = binary_mask(tr)
-    edge = skimage.feature.canny(bin, sigma=s) # canny filter that marks the interface
+    # bin = binary_mask(tr)
+    edge = skimage.feature.canny(tr, sigma=s) # canny filter that marks the interface
     x, y = edge_image2scatter(edge)
     image, zi = zoom_in(im, zoom_x1, zoom_x2, zoom_y1, zoom_y2)
 
