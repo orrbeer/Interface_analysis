@@ -31,7 +31,7 @@ def binary_mask(im, threshold=False, show_ims=False):
         plt.show()
     return br_bin
     
-def edge_image2scatter(edge_im,show_ims=True):
+def edge_image2scatter(edge_im,show_ims=False):
     xy = np.column_stack(np.where(edge_im > 0)) # Get the x and y values of the interface for a scatter plot.
     x = xy[:,1]
     y = xy[:,0]
@@ -57,7 +57,6 @@ def zoom_in(im,x1,x2,y1,y2,linewidth=8,show_ims=False):
         plt.imshow(zi_image)
         plt.show()
     return image, zi_image
-
 
 br_roi_x1, br_roi_x2,br_roi_y1,br_roi_y2 = 0, -1, 300, 430
 br_zoom_x1, br_zoom_x2, br_zoom_y1, br_zoom_y2 = 800, 1400, 320, 470
@@ -94,7 +93,7 @@ for i,file in enumerate(files):
 
     ax1 = fig.add_subplot(4,2,(1+i,3+i))
     ax2 = fig.add_subplot(4,2,5+i)
-    ax5 = fig.add_subplot(4,2,7+i)
+    ax3 = fig.add_subplot(4,2,7+i)
 
     ax1.imshow(image, aspect="auto")
     ax1.add_patch(rect2)
@@ -114,12 +113,13 @@ for i,file in enumerate(files):
                     labelbottom = False, bottom = False) 
                             
     yfit = np.polyval(fit,x)
-    ax5.plot(x/pix2nm,(yfit-y)/pix2nm)
-    ax5.set_xlabel('Distance (nm)')
-    ax5.set_ylabel('Residual (nm)')
-    ax5.set_xlim([0, max(x/pix2nm)])
-    ax5.set_ylim([max(yfit-y)*1.2, min(yfit-y)*1.2])
-    ax5.vlines(x=[zoom_x1/pix2nm, zoom_x2/pix2nm], ymin=min(yfit-y)*1.5, ymax=max(yfit-y)*1.5, colors='k', ls='--', linewidth=0.7)
+    print(np.shape(yfit))
+    ax3.plot(x/pix2nm,(yfit-y)/pix2nm)
+    ax3.set_xlabel('Distance (nm)')
+    ax3.set_ylabel('Residual (nm)')
+    # ax3.set_xlim([0, max(x/pix2nm)])
+    # ax3.set_ylim([max(yfit-y)*1.2, min(yfit-y)*1.2])
+    ax3.vlines(x=[zoom_x1/pix2nm, zoom_x2/pix2nm], ymin=min(yfit-y)/pix2nm*1.5, ymax=max(yfit-y)/pix2nm*1.5, colors='k', ls='--', linewidth=0.7)
     gof = sum(map(abs, yfit-y))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
     print(gof/pix2nm)
 
