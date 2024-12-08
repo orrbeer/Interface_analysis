@@ -71,7 +71,7 @@ for i,file in enumerate(files):
     if i == 0:
         roi_x1, roi_x2, roi_y1, roi_y2 = br_roi_x1, br_roi_x2,br_roi_y1,br_roi_y2
         zoom_x1, zoom_x2, zoom_y1, zoom_y2 = br_zoom_x1, br_zoom_x2, br_zoom_y1, br_zoom_y2
-        s = 2
+        s = 15
         rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
         axis = [0,1500,1030,30]
         text_xy = [1150, 930]
