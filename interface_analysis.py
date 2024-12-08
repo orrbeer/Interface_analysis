@@ -92,8 +92,6 @@ for i,file in enumerate(files):
 
 
     ax1 = fig.add_subplot(4,2,(1+i,3+i))
-    ax2 = fig.add_subplot(4,2,5+i)
-    ax3 = fig.add_subplot(4,2,7+i)
 
     ax1.imshow(image, aspect="auto")
     ax1.add_patch(rect2)
@@ -102,6 +100,8 @@ for i,file in enumerate(files):
     ax1.tick_params(left = False, right = False , labelleft = False , 
                     labelbottom = False, bottom = False) 
 
+    ax2 = fig.add_subplot(4,2,5+i)
+    
     ax2.imshow(zi, cmap='gray', aspect="auto")
     fit = np.polyfit(x,y,1)
     roi_zoom_offset = roi_y1-zoom_y1
@@ -111,7 +111,8 @@ for i,file in enumerate(files):
 
     ax2.tick_params(left = False, right = False , labelleft = False , 
                     labelbottom = False, bottom = False) 
-                            
+    
+    ax3 = fig.add_subplot(4,2,7+i)    
     yfit = np.polyval(fit,x)
     print(np.shape(yfit))
     ax3.plot(x/pix2nm,(yfit-y)/pix2nm)
@@ -120,6 +121,9 @@ for i,file in enumerate(files):
     # ax3.set_xlim([0, max(x/pix2nm)])
     # ax3.set_ylim([max(yfit-y)*1.2, min(yfit-y)*1.2])
     ax3.vlines(x=[zoom_x1/pix2nm, zoom_x2/pix2nm], ymin=min(yfit-y)/pix2nm*1.5, ymax=max(yfit-y)/pix2nm*1.5, colors='k', ls='--', linewidth=0.7)
+    if i == 1:
+        ax3.yaxis.set_ticklabels([])
+        ax3.set_ylabel('')
     gof = sum(map(abs, yfit-y))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
     print(gof/pix2nm)
 
