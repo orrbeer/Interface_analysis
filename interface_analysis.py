@@ -8,15 +8,15 @@ import matplotlib.patches as patches
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rc('font', size=14)
 
-def set_ROI(file,x1,x2,y1,y2, show_ims=False):
-    im = plt.imread(file)
+def set_ROI(im,x1,x2,y1,y2, show_ims=False):
+    im_roi = im[x1:x2, y1:y2]
     if show_ims == True:
         plt.subplot(211)
         plt.imshow(im)
         plt.subplot(212)
         plt.imshow(im[x1:x2, y1:y2])
         plt.show()
-    return im[x1:x2, y1:y2]
+    return im_roi
 
 def binary_mask(im, threshold=False, show_ims=False):
     if not threshold:
@@ -37,6 +37,8 @@ def edge_image2scatter(edge_im,show_ims=False):
     y = xy[:,0]
     unique_x = np.unique(x) # Remove values that are not single values of f(x) חד חד ערכי
     avg_y = np.array([np.mean(y[x == ux]) for ux in unique_x])
+    if show_ims==True:
+        plt.plot(unique_x,avg_y)
     return unique_x, avg_y
     
 def zoom_in(im,x1,x2,y1,y2,linewidth=8,show_ims=False):
@@ -47,7 +49,7 @@ def zoom_in(im,x1,x2,y1,y2,linewidth=8,show_ims=False):
     image[y2:y2+lw,x1:x2] = color
     image[y1:y2,x1-lw:x1] = color
     image[y1:y2,x2:x2+lw] = color
-    zi_image = image[y2:y1,x1:x2]
+    zi_image = image[y1:y2,x1:x2]
     if show_ims == True:
         plt.subplot(211)
         plt.imshow(image)
@@ -56,84 +58,79 @@ def zoom_in(im,x1,x2,y1,y2,linewidth=8,show_ims=False):
         plt.show()
     return image, zi_image
 
-br_im = plt.imread('images/br.tif') #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
-br_tr = set_ROI('images/br.tif',300,430,0,-1) # trim the figures for a single interface
-br_bin = binary_mask(br_tr)
-br_edge = skimage.feature.canny(br_tr, sigma=1.65) # canny filter that marks the interface
-br_x, br_y = edge_image2scatter(br_edge)
-cl_im = plt.imread('images/90_rt_cl_15-1.tif') #  the scale bar is accross the 2873-2393= 480 pixels 500 nm
-cl_tr =  set_ROI('images/90_rt_cl_15-1.tif',700,880,0,-1)
-cl_bin = binary_mask(cl_tr)
-cl_edge = skimage.feature.canny(cl_bin, sigma=2) # Canny filter detects edges.
-cl_x, cl_y = edge_image2scatter(cl_edge)
+br_roi_x1, br_roi_x2,br_roi_y1,br_roi_y2 = 0, -1, 300, 430
+br_zoom_x1, br_zoom_x2, br_zoom_y1, br_zoom_y2 = 800, 1400, 320, 470
+cl_roi_x1, cl_roi_x2,cl_roi_y1,cl_roi_y2 = 0, -1, 700, 880
+cl_zoom_x1, cl_zoom_x2, cl_zoom_y1, cl_zoom_y2 = 1800, 2500, 750, 920
+files = ['images/br.tif', 'images/90_rt_cl_15-1.tif']
 
-cl_image, cl_zoom_in = zoom_in(cl_im,1800, 2500, 750, 920)
-br_image, br_zoom_in = zoom_in(br_im,800, 1400, 320, 470)
+resplot_ylims = [-48, 32]
 
 fig = plt.figure(figsize=(7,5.5))
-ax1 = fig.add_subplot(4,2,(1,3))
-ax2 = fig.add_subplot(425)
-ax3 = fig.add_subplot(4,2,(2,4))
-ax4 = fig.add_subplot(426)
-ax5 = fig.add_subplot(427)
-ax6 = fig.add_subplot(428)
+for i,file in enumerate(files):
+    if i == 0:
+        roi_x1, roi_x2, roi_y1, roi_y2 = br_roi_x1, br_roi_x2,br_roi_y1,br_roi_y2
+        zoom_x1, zoom_x2, zoom_y1, zoom_y2 = br_zoom_x1, br_zoom_x2, br_zoom_y1, br_zoom_y2
+        s = 1.65
+        rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
+        axis = [0,1500,1030,30]
+        text_xy = [1150, 930]
+        pix2nm = 500/238
+    if i == 1:
+        roi_x1, roi_x2, roi_y1, roi_y2 = cl_roi_x1, cl_roi_x2,cl_roi_y1,cl_roi_y2
+        zoom_x1, zoom_x2, zoom_y1, zoom_y2 = cl_zoom_x1, cl_zoom_x2, cl_zoom_y1, cl_zoom_y2
+        s = 3
+        rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
+        axis = [782,2618,1610,390]
+        text_xy = [2065, 1490]
+        pix2nm = 500/480
+    
+    im = plt.imread(file) #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
+    tr = set_ROI(im, roi_y1, roi_y2,roi_x1, roi_x2) # trim the figures for a single interface
+    edge = skimage.feature.canny(tr, sigma=s) # canny filter that marks the interface
+    x, y = edge_image2scatter(edge)
+    image, zi = zoom_in(im, zoom_x1, zoom_x2, zoom_y1, zoom_y2)
 
-ax1.imshow(cl_image, aspect="auto")
-rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
-ax1.add_patch(rect2)
-ax1.text(2065, 1490, '500 nm',color='w')
-ax1.axis([782,2618,1610,390])
-ax1.tick_params(left = False, right = False , labelleft = False , 
-                labelbottom = False, bottom = False) 
 
-ax2.imshow(cl_im, cmap='gray', aspect="auto")
-fit = np.polyfit(cl_x,cl_y+700.,1)
-ax2.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
-ax2.plot(cl_x,cl_y+700. ,'b--',linewidth=1)
-ax2.axis([1800, 1800+700, 750+170, 750])
-ax2.tick_params(left = False, right = False , labelleft = False , 
-                labelbottom = False, bottom = False) 
-                
-                
-yfit = np.polyval(fit,cl_x)
-ax5.plot(cl_x/480*500,(yfit-cl_y-700)/480*500)
-ax5.set_xlabel('Distance (nm)')
-ax5.set_ylabel('Residual (nm)')
-ax5.set_xlim([0, 3200])
-ax5.set_ylim([30, -49])
-ax5.vlines(x=[1800/480*500, (1800+700)/480*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
-gof = sum(map(abs, yfit-cl_y-700))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
-print(gof/480*500)
+    ax1 = fig.add_subplot(4,2,(1+i,3+i))
 
-# ax5.set_xlim([1800, 1800+700])
-###########################################
+    ax1.imshow(image, aspect="auto")
+    # ax1.plot(x,y+roi_y1) This is a sanity check. It works
+    ax1.add_patch(rect2)
+    ax1.text(text_xy[0],text_xy[1], '500 nm',color='w')
+    ax1.axis(axis)
+    ax1.tick_params(left = False, right = False , labelleft = False , 
+                    labelbottom = False, bottom = False) 
 
-ax3.imshow(br_image, aspect="auto")
-roi2 = [800, 1400, 470, 320]
-rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
-ax3.add_patch(rect2)
-ax3.text(1150, 930, '500 nm',color='w')
-ax3.axis([0,1500,1030,30])
-ax3.tick_params(left = False, right = False , labelleft = False , 
-                labelbottom = False, bottom = False) 
+    ax2 = fig.add_subplot(4,2,5+i)
+    
+    ax2.imshow(zi, cmap='gray', aspect="auto")
+    fit = np.polyfit(x,y,1)
+    len_zi = np.shape(zi)[1]-1 # This is the index of the last pixel lengthwise of the zoomed in (zi) image
+    roi_zoom_offset = roi_y1-zoom_y1
+    ax2.plot([0,len_zi],
+    [fit[0]*(zoom_x1)+fit[1]+roi_zoom_offset,fit[0]*(zoom_x2-1)+fit[1]+roi_zoom_offset],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
+    
+    ### The offset here is arbitrary just to make it fit. I don't know how to solve it
+    ax2.plot(range(len_zi),y[zoom_x1-12 : zoom_x2-13]+roi_zoom_offset,'b--',linewidth=1) # I cant figure out why there is a missmatch between the line and image
 
-ax4.imshow(br_im, cmap='gray', aspect="auto")
-fit = np.polyfit(br_x,br_y+300.,1)
-ax4.plot([0,3000],[fit[0]*0+fit[1],fit[0]*3000+fit[1]],'m--',linewidth=1)
-ax4.plot(br_x,br_y+300 ,'b--',linewidth=0.8)
-ax4.axis(roi2)
-ax4.tick_params(left = False, right = False , labelleft = False , 
-                labelbottom = False, bottom = False) 
-                
-yfit = np.polyval(fit,br_x)
-ax6.plot(br_x/238*500,(yfit-br_y-300)/238*500)
-ax6.set_xlabel('Distance (nm)')
-# ax6.set_ylabel('Residual (nm)')
-ax6.set_xlim([0, 3200])
-ax6.set_ylim([30, -49])
-ax6.vlines(x=[800/238*500, (800+600)/238*500], ymin=-60, ymax=35, colors='k', ls='--', linewidth=0.7)
-gof = sum(map(abs, yfit-br_y-300))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
-print(gof/238*500)
+    ax2.tick_params(left = False, right = False , labelleft = False , 
+                    labelbottom = False, bottom = False) 
+    
+    ax3 = fig.add_subplot(4,2,7+i)    
+    yfit = np.polyval(fit,x)
+    x_nm = x*pix2nm
+    y_res_nm = (yfit-y)*pix2nm
+    ax3.plot(x_nm,y_res_nm)
+    ax3.set_xlabel('Distance (nm)')
+    if i == 0:
+        ax3.set_ylabel('Residual (nm)')
+    ax3.set_xlim([axis[0]*pix2nm, axis[1]*pix2nm])
+    ax3.set_ylim(resplot_ylims)
+    ax3.vlines(x=[zoom_x1*pix2nm, zoom_x2*pix2nm], ymin=resplot_ylims[0], ymax=resplot_ylims[1], colors='k', ls='--', linewidth=0.7)
+    gof = sum(map(abs, y_res_nm))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
+    print(gof)
+
 fig.subplots_adjust(hspace=0.5, right=0.95, top=0.96)
-# plt.savefig(r'Output\example.svg')
+plt.savefig(r'Output\example.svg')
 plt.show()
