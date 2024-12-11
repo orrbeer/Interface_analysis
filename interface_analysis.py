@@ -132,5 +132,5 @@ for i,file in enumerate(files):
     print(gof)
 
 fig.subplots_adjust(hspace=0.5, right=0.95, top=0.96)
-plt.savefig(r'Output\example.svg')
+# plt.savefig(r'Output\example.svg')
 plt.show()
