@@ -64,7 +64,7 @@ cl_roi_x1, cl_roi_x2,cl_roi_y1,cl_roi_y2 = 0, -1, 700, 880
 cl_zoom_x1, cl_zoom_x2, cl_zoom_y1, cl_zoom_y2 = 1800, 2500, 750, 920
 files = ['images/br.tif', 'images/90_rt_cl_15-1.tif']
 
-
+resplot_ylims = [-48, 32]
 
 fig = plt.figure(figsize=(7,5.5))
 for i,file in enumerate(files):
@@ -75,19 +75,18 @@ for i,file in enumerate(files):
         rect2 = patches.Rectangle((1200, 960), 238, 12, linewidth=1, edgecolor='w', facecolor='w')
         axis = [0,1500,1030,30]
         text_xy = [1150, 930]
-        pix2nm = 238*500
-    else:
+        pix2nm = 500/238
+    if i == 1:
         roi_x1, roi_x2, roi_y1, roi_y2 = cl_roi_x1, cl_roi_x2,cl_roi_y1,cl_roi_y2
         zoom_x1, zoom_x2, zoom_y1, zoom_y2 = cl_zoom_x1, cl_zoom_x2, cl_zoom_y1, cl_zoom_y2
         s = 3
         rect2 = patches.Rectangle((2050, 1520), 480, 12, linewidth=1, edgecolor='w', facecolor='w')
         axis = [782,2618,1610,390]
         text_xy = [2065, 1490]
-        pix2nm = 480*500
+        pix2nm = 500/480
     
     im = plt.imread(file) #  the scale bar is accross the 1464-1226= 238 pixels 500 nm
     tr = set_ROI(im, roi_y1, roi_y2,roi_x1, roi_x2) # trim the figures for a single interface
-    # bin = binary_mask(tr)
     edge = skimage.feature.canny(tr, sigma=s) # canny filter that marks the interface
     x, y = edge_image2scatter(edge)
     image, zi = zoom_in(im, zoom_x1, zoom_x2, zoom_y1, zoom_y2)
@@ -96,6 +95,7 @@ for i,file in enumerate(files):
     ax1 = fig.add_subplot(4,2,(1+i,3+i))
 
     ax1.imshow(image, aspect="auto")
+    # ax1.plot(x,y+roi_y1) This is a sanity check. It works
     ax1.add_patch(rect2)
     ax1.text(text_xy[0],text_xy[1], '500 nm',color='w')
     ax1.axis(axis)
@@ -106,28 +106,30 @@ for i,file in enumerate(files):
     
     ax2.imshow(zi, cmap='gray', aspect="auto")
     fit = np.polyfit(x,y,1)
+    len_zi = np.shape(zi)[1]-1 # This is the index of the last pixel lengthwise of the zoomed in (zi) image
     roi_zoom_offset = roi_y1-zoom_y1
-    ax2.plot([0,(zoom_x2-zoom_x1-1)],
+    ax2.plot([0,len_zi],
     [fit[0]*(zoom_x1)+fit[1]+roi_zoom_offset,fit[0]*(zoom_x2-1)+fit[1]+roi_zoom_offset],'m--',linewidth=1) # Drawing a straight line from two points x = 0 f(0) and x=3000 f(3000)
-    ax2.plot(x[0:zoom_x2-zoom_x1-1],y[zoom_x1:(zoom_x2-1)]+roi_zoom_offset,'b--',linewidth=1)
+    
+    ### The offset here is arbitrary just to make it fit. I don't know how to solve it
+    ax2.plot(range(len_zi),y[zoom_x1-12 : zoom_x2-13]+roi_zoom_offset,'b--',linewidth=1) # I cant figure out why there is a missmatch between the line and image
 
     ax2.tick_params(left = False, right = False , labelleft = False , 
                     labelbottom = False, bottom = False) 
     
     ax3 = fig.add_subplot(4,2,7+i)    
     yfit = np.polyval(fit,x)
-    print(np.shape(yfit))
-    ax3.plot(x/pix2nm,(yfit-y)/pix2nm)
+    x_nm = x*pix2nm
+    y_res_nm = (yfit-y)*pix2nm
+    ax3.plot(x_nm,y_res_nm)
     ax3.set_xlabel('Distance (nm)')
-    ax3.set_ylabel('Residual (nm)')
-    # ax3.set_xlim([0, max(x/pix2nm)])
-    # ax3.set_ylim([max(yfit-y)*1.2, min(yfit-y)*1.2])
-    ax3.vlines(x=[zoom_x1/pix2nm, zoom_x2/pix2nm], ymin=min(yfit-y)/pix2nm*1.5, ymax=max(yfit-y)/pix2nm*1.5, colors='k', ls='--', linewidth=0.7)
-    if i == 1:
-        ax3.yaxis.set_ticklabels([])
-        ax3.set_ylabel('')
-    gof = sum(map(abs, yfit-y))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
-    print(gof/pix2nm)
+    if i == 0:
+        ax3.set_ylabel('Residual (nm)')
+    ax3.set_xlim([axis[0]*pix2nm, axis[1]*pix2nm])
+    ax3.set_ylim(resplot_ylims)
+    ax3.vlines(x=[zoom_x1*pix2nm, zoom_x2*pix2nm], ymin=resplot_ylims[0], ymax=resplot_ylims[1], colors='k', ls='--', linewidth=0.7)
+    gof = sum(map(abs, y_res_nm))/len(yfit) # The goodness of fit is calculated by the sum of absolute value of errors over the number of pixels
+    print(gof)
 
 fig.subplots_adjust(hspace=0.5, right=0.95, top=0.96)
 plt.savefig(r'Output\example.svg')
